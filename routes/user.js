@@ -56,7 +56,7 @@ route.post("/signup", (req, res) => {
         });
       }
 
-      access_token = jwt.sign(
+      let access_token = jwt.sign(
         {
           email,
           username,
@@ -210,24 +210,22 @@ route.get("/verify/:access_token", (req, res) => {
 
 // * send verification email
 function sendVerificationEmail(email, username, access_token) {
-  // create reusable transporter object using the default SMTP transport
   let transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
     port: 587,
-    secure: false, // true for 465, false for other ports
+    secure: false,
     auth: {
-      user: process.env.EMAIL, // generated ethereal user
-      pass: process.env.PASSWORD, // generated ethereal password
+      user: process.env.EMAIL,
+      pass: process.env.PASSWORD,
     },
   });
 
-  // setup email data with unicode symbols
   let mailOptions = {
     from: `"Fred Foo 👻" <${process.env.EMAIL}>`, // sender address
-    to: email, // list of receivers
-    subject: "Hello ✔", // Subject line
-    text: "Hello world?", // plain text body
-    html: `<b>Hello ${username}!</b> <br> <br> <a href="http://localhost:3000/users/verify/${access_token}">Click here to verify your account</a>`, // html body
+    to: email,
+    subject: "Hello ✔",
+    text: "Hello world?",
+    html: `<b>Hello ${username}!</b> <br> <br> <a href="http://localhost:3000/users/verify/${access_token}">Click here to verify your account</a>`,
   };
 
   transporter.sendMail(mailOptions, (error, info) => {
@@ -235,8 +233,6 @@ function sendVerificationEmail(email, username, access_token) {
       return console.log(error);
     }
     console.log("Message sent: %s", info.messageId);
-    // Preview only available when sending through an Ethereal account
-    console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
   });
 }
 
