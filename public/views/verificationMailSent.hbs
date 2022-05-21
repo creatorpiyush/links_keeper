@@ -3,15 +3,20 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dashboard</title>
+    <title>Verify Account</title>
   </head>
   <body>
 
-    {{user.email}}
+    <h1>
+      Verify Account
+    </h1>
 
-    {{#each link}}
-      <a href="/links/LinkStats/{{this.id}}">{{this.link.title}}</a>
-    {{/each}}
+    <h2>Verification Email Sent to {{email}}</h2>
 
   </body>
+
+  <script>
+    alert('{{{message}}}');
+  </script>
+
 </html>

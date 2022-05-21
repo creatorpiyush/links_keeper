@@ -107,6 +107,13 @@ route.post("/signup", (req, res) => {
 });
 
 // * login
+
+route.get("/login", (req, res) => {
+  console.log(req.flash("error"));
+  return res.render("login", { error: req.flash("error") });
+  // res.send(req.flash("error"));
+});
+
 route.post("/login", (req, res) => {
   const { email, password } = req.body;
 
@@ -116,6 +123,7 @@ route.post("/login", (req, res) => {
   body("password", "Password is required").notEmpty();
 
   const errors = validationResult(req);
+  console.log(validationResult(req));
   if (!errors.isEmpty()) {
     return res.status(422).json({ errors: error });
   }
@@ -123,24 +131,24 @@ route.post("/login", (req, res) => {
   db.User.findOne({ email })
     .then((user) => {
       if (!user) {
-        return res.status(400).json({
-          message: "User not found",
-        });
+        return res.status(400).render("login", { error: "User not found" });
+        req.flash("error", "User not found");
+        return res.redirect("./login");
       }
 
       bcrypt.compare(password, user.password).then((isMatch) => {
         if (!isMatch) {
-          return res.status(400).json({
-            message: "Invalid credentials",
-          });
+          return res.render("login", { error: "Incorrect password" });
+          // req.flash("error", "Incorrect password");
+          // return res.redirect("./login");
         }
 
         // * is user verified
         if (!user.is_verified) {
           sendVerificationEmail(user.email, user.username, user.access_token);
-          return res.status(400).json({
-            message: "User not verified, Verification email sent",
-          });
+          return res.render("login", { error: "User not verified" });
+          req.flash("error", "Please verify your account");
+          return res.redirect("./login");
         }
 
         const payload = {
@@ -152,27 +160,23 @@ route.post("/login", (req, res) => {
 
         jwt.sign(payload, process.env.JWT_SECRET, (err, token) => {
           if (err) {
-            return res.status(400).json({
-              message: "Error signing token",
-            });
+            return res
+              .status(400)
+              .render("login", { error: "Error logging in" });
+            req.flash("error", "Error signing token");
+            return res.redirect("./login");
           }
 
           req.session.user = user;
 
-          console.log(req.session.user.email);
-
-          res.json({
-            success: true,
-            token,
-          });
+          res.status(200).redirect("/dashboard");
         });
       });
     })
     .catch((err) => {
-      console.log(err);
-      res.status(500).json({
-        message: "Error logging in",
-      });
+      res.status(400).render("login", { error: "Error logging in" });
+      req.flash("error", "Error logging in");
+      return res.redirect("./login");
     });
 });
 

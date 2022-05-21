@@ -4,7 +4,7 @@ const { body, validationResult } = require("express-validator");
 
 const db = require("../models");
 
-const mongoose = require("mongoose");
+const moment = require("moment");
 
 // add Link
 route.post("/addLink", (req, res) => {
@@ -150,25 +150,13 @@ route.get("/getLinks", (req, res) => {
 });
 
 // track Link
-route.post("/trackLink", (req, res) => {
-  const { id } = req.body;
-
-  // * Validate
-  body("url", "URL is required").notEmpty();
-
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    console.log(errors.array());
-    return res.status(422).json({ errors: error });
-  }
-
-  let userEmail = req.session.user.email;
+route.post("/trackLink/:id", (req, res) => {
+  const { id } = req.params;
 
   // track Link
-  db.Link.findOneAndUpdate(
+  db.Link.findByIdAndUpdate(
     {
       _id: id,
-      email: userEmail,
     },
     {
       $inc: {
@@ -183,6 +171,31 @@ route.post("/trackLink", (req, res) => {
       res.json(link);
     })
 
+    .catch((err) => {
+      console.log(err);
+      res.status(400).json(err);
+    });
+});
+
+// get link stats
+route.get("/LinkStats/:id", (req, res) => {
+  const id = req.params.id;
+
+  db.Link.findById(id)
+    .then((link) => {
+      const linkData = {
+        id: link._id,
+        title: link.link.title,
+        url: link.link.url,
+        description: link.link.description,
+        clicks: link.link.clicks,
+        created_at: moment(link.link.created_at).format("Do MMM YYYY"),
+        updated_at: moment(link.link.updated_at).format("Do MMM YYYY"),
+      };
+
+      return res.render("linkStats", { link: linkData });
+      // res.json(link);
+    })
     .catch((err) => {
       console.log(err);
       res.status(400).json(err);

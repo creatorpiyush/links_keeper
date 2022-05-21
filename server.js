@@ -7,6 +7,8 @@ const hbs = require("hbs");
 
 const session = require("express-session");
 
+const flash = require("connect-flash");
+
 require("dotenv").config();
 
 const app = express();
@@ -19,12 +21,16 @@ app.use(
   })
 );
 
+app.use(flash());
+
 app.use(passport.initialize());
 app.use(passport.session());
 
 // hbs
 app.set("view engine", "hbs");
 app.set("views", __dirname + "/public/views");
+
+hbs.localsAsTemplateData(app);
 
 const db = require("./models");
 
@@ -34,7 +40,7 @@ app.use(express.urlencoded({ extended: true }));
 // routers
 app.use("/", require("./routes/index"));
 
-app.use("/users", require("./routes/userAuth"));
+app.use("/user", require("./routes/userAuth"));
 
 app.use("/links", require("./routes/userLinks"));
 

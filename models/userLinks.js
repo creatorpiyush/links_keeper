@@ -19,7 +19,7 @@ const schema = new mongoose.Schema({
     description: {
       type: String,
     },
-    clinks: {
+    clicks: {
       type: Number,
       default: 0,
     },
