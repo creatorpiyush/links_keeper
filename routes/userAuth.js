@@ -157,6 +157,10 @@ route.post("/login", (req, res) => {
             });
           }
 
+          req.session.user = user;
+
+          console.log(req.session.user.email);
+
           res.json({
             success: true,
             token,
