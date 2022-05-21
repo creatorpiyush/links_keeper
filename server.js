@@ -36,6 +36,8 @@ app.use("/", require("./routes/index"));
 
 app.use("/users", require("./routes/userAuth"));
 
+app.use("/links", require("./routes/userLinks"));
+
 const PORT = process.env.PORT;
 
 // * Server Listen

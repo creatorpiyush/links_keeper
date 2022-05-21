@@ -16,4 +16,5 @@ mongoose
 
 module.exports = {
   User: require("./users"),
+  Link: require("./userLinks"),
 };
