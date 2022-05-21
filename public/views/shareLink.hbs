@@ -7,6 +7,10 @@
   </head>
   <body>
 
+    {{user.username}}
+
+    <br />
+
     {{#each linksdata}}
       <a onclick="update('{{this.id}}')" href="{{this.link.url}}">
         {{this.link.title}}

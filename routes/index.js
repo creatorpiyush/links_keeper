@@ -53,8 +53,11 @@ route.get("/:username", (req, res) => {
   db.Link.find({ username: username })
     .populate("link")
     .then((linksdata) => {
-      res.render("shareLink", {
-        linksdata,
+      db.User.findOne({ username: username }).then((user) => {
+        res.render("shareLink", {
+          linksdata,
+          user,
+        });
       });
     })
     .catch((err) => {
