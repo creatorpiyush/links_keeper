@@ -9,6 +9,8 @@ const session = require("express-session");
 
 const flash = require("connect-flash");
 
+const methodOverride = require("method-override");
+
 require("dotenv").config();
 
 const app = express();
@@ -20,6 +22,8 @@ app.use(
     saveUninitialized: false,
   })
 );
+
+app.use(methodOverride("_method"));
 
 app.use(flash());
 

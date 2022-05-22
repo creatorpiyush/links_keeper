@@ -16,39 +16,14 @@ route.get("/dashboard", (req, res) => {
       .then((link) => {
         res.render("dashboard", { link, user: req.session.user });
       });
-    // res.render("dashboard", {
-    //   user: req.session.user,
-    // });
   } else {
-    res.redirect("/");
+    res.redirect("/user/login");
   }
 });
 
 // shared-page
 route.get("/:username", (req, res) => {
   const { username } = req.params;
-
-  // db.User.findOne({ username })
-  //   .then((user) => {
-  //     if (!user) {
-  //       return res.status(400).json({
-  //         message: "User not found",
-  //       });
-  //     }
-
-  //     user.populate("link").then((linksdata) => {
-  //       res.render("shareLink", {
-  //         user,
-  //         linksdata,
-  //       });
-  //     });
-  //   })
-
-  //   .catch((err) => {
-  //     res.status(400).json({
-  //       message: "Error getting user",
-  //     });
-  //   });
 
   db.Link.find({ username: username })
     .populate("link")

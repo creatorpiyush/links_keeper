@@ -109,9 +109,7 @@ route.post("/signup", (req, res) => {
 // * login
 
 route.get("/login", (req, res) => {
-  console.log(req.flash("error"));
   return res.render("login", { error: req.flash("error") });
-  // res.send(req.flash("error"));
 });
 
 route.post("/login", (req, res) => {
@@ -214,6 +212,14 @@ route.get("/verify/:access_token", (req, res) => {
     });
 });
 
+// * logout
+route.delete("/logout", (req, res) => {
+  req.session.destroy();
+  res.status(200).json({
+    message: "User logged out",
+  });
+});
+
 // * send verification email
 function sendVerificationEmail(email, username, access_token) {
   let transporter = nodemailer.createTransport({
@@ -232,6 +238,34 @@ function sendVerificationEmail(email, username, access_token) {
     subject: "Hello ✔",
     text: "Hello world?",
     html: `<b>Hello ${username}!</b> <br> <br> <a href="http://localhost:3000/users/verify/${access_token}">Click here to verify your account</a>`,
+  };
+
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      return console.log(error);
+    }
+    console.log("Message sent: %s", info.messageId);
+  });
+}
+
+// * send reset email
+function sendResetEmail(email, reset_token) {
+  let transporter = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false,
+    auth: {
+      user: process.env.EMAIL,
+      pass: process.env.PASSWORD,
+    },
+  });
+
+  let mailOptions = {
+    from: `"Fred Foo 👻" <${process.env.EMAIL}>`, // sender address
+    to: email,
+    subject: "Hello ✔",
+    text: "Hello world?",
+    html: `<b>Hello!</b> <br> <br> <a href="http://localhost:3000/users/reset-password/${reset_token}">Click here to reset your password</a>`,
   };
 
   transporter.sendMail(mailOptions, (error, info) => {
