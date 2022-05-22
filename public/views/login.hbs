@@ -4,22 +4,60 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Login</title>
+
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+
   </head>
   <body>
 
-    <h1>
-      Login
-    </h1>
+    <container>
 
-    {{#if error}}
-      <h2>{{error}}</h2>
-    {{/if}}
+      <div class="row">
+        <div class="col-md-5 col-md-offset-4 mx-auto m-auto p-auto">
+          <h1>Login</h1>
 
-    <form action="/user/login" method="post">
-      <input type="text" name="email" placeholder="Email" />
-      <input type="password" name="password" placeholder="Password" />
-      <input type="submit" value="Login" />
-    </form>
+          <form action="/user/login" method="post">
+
+            {{#if error}}
+              <div class="alert alert-danger text-center mx-auto" role="alert">
+                {{error}}
+                !
+              </div>
+            {{/if}}
+
+            <div class="form-floating mb-3">
+              <input
+                type="email"
+                class="form-control"
+                id="floatingInput"
+                name="email"
+                placeholder="Email"
+              />
+              <label for="floatingInput">Email address</label>
+            </div>
+            <div class="form-floating">
+              <input
+                type="password"
+                class="form-control"
+                id="floatingPassword"
+                name="password"
+                placeholder="Password"
+              />
+              <label for="floatingPassword">Password</label>
+            </div>
+
+            <button
+              type="submit"
+              class="btn btn-primary btn-block mt-2 mx-auto d-block"
+            >Login</button>
+          </form>
+        </div>
+      </div>
+
+    </container>
 
   </body>
+
+  <script src="/js/jquery.js"></script>
+  <script src="/js/bootstrap.bundle.min.js"></script>
 </html>

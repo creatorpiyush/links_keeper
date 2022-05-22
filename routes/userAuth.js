@@ -123,32 +123,32 @@ route.post("/login", (req, res) => {
   body("password", "Password is required").notEmpty();
 
   const errors = validationResult(req);
-  console.log(validationResult(req));
   if (!errors.isEmpty()) {
     return res.status(422).json({ errors: error });
+  }
+
+  // * empty field check
+  if (email === "" || password === "") {
+    return res.status(400).render("login", {
+      error: "Please fill in all fields",
+    });
   }
 
   db.User.findOne({ email })
     .then((user) => {
       if (!user) {
         return res.status(400).render("login", { error: "User not found" });
-        req.flash("error", "User not found");
-        return res.redirect("./login");
       }
 
       bcrypt.compare(password, user.password).then((isMatch) => {
         if (!isMatch) {
           return res.render("login", { error: "Incorrect password" });
-          // req.flash("error", "Incorrect password");
-          // return res.redirect("./login");
         }
 
         // * is user verified
         if (!user.is_verified) {
           sendVerificationEmail(user.email, user.username, user.access_token);
           return res.render("login", { error: "User not verified" });
-          req.flash("error", "Please verify your account");
-          return res.redirect("./login");
         }
 
         const payload = {
@@ -163,8 +163,6 @@ route.post("/login", (req, res) => {
             return res
               .status(400)
               .render("login", { error: "Error logging in" });
-            req.flash("error", "Error signing token");
-            return res.redirect("./login");
           }
 
           req.session.user = user;
