@@ -22,6 +22,14 @@
 
     <h3>Updated At : {{link.updated_at}}</h3>
 
+    <h3>
+      {{#if link.isPrivate}}
+        Private
+      {{else}}
+        Public
+      {{/if}}
+    </h3>
+
   </body>
 
 </html>

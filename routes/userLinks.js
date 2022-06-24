@@ -22,6 +22,8 @@ route.post("/addLink", (req, res) => {
   body("title", "Title is required").notEmpty();
   body("url", "URL is required").notEmpty();
 
+  // console.log(isPrivate);
+
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     console.log(errors.array());
@@ -40,8 +42,12 @@ route.post("/addLink", (req, res) => {
     email: userEmail,
   }).then((link) => {
     if (link) {
-      return res.status(400).json({
-        message: "Link already exists",
+      // return res.status(400).json({
+      //   message: "Link already exists",
+      // });
+
+      return res.status(400).render("addLink", {
+        error: "Link already exists",
       });
     }
 
@@ -58,7 +64,7 @@ route.post("/addLink", (req, res) => {
       isPrivate,
     })
       .then((link) => {
-        res.json(link);
+        res.redirect("/dashboard");
       })
       .catch((err) => {
         console.log(err);
@@ -68,8 +74,32 @@ route.post("/addLink", (req, res) => {
 });
 
 // update Link
-route.post("/updateLink", (req, res) => {
-  const { title, url, description, id } = req.body;
+route.get("/updateLink/:id", (req, res) => {
+  if (req.session.user) {
+    const id = req.params.id;
+
+    db.Link.findOne({
+      _id: id,
+    }).then((link) => {
+      if (link) {
+        res.render("updateLink", {
+          link,
+        });
+      } else {
+        res.status(400).render("error", {
+          error: "Link not found",
+        });
+      }
+    });
+  } else {
+    res.redirect("/user/login");
+  }
+});
+
+route.post("/updateLink/:id", (req, res) => {
+  const { title, url, description, isPrivate } = req.body;
+
+  const id = req.params.id;
 
   // * Validate
   body("title", "Title is required").notEmpty();
@@ -91,6 +121,7 @@ route.post("/updateLink", (req, res) => {
         "link.title": title,
         "link.url": url,
         "link.description": description,
+        isPrivate: isPrivate,
       },
     },
     {
@@ -104,6 +135,8 @@ route.post("/updateLink", (req, res) => {
         });
       }
 
+      return res.status(200).redirect("/dashboard");
+
       res.json(link);
     })
     .catch((err) => {
@@ -113,8 +146,10 @@ route.post("/updateLink", (req, res) => {
 });
 
 // delete Link
-route.post("/deleteLink", (req, res) => {
-  const { id } = req.body;
+route.delete("/deleteLink/:id", (req, res) => {
+  // const { id } = req.body;
+
+  const id = req.params.id;
 
   // * Validate
   body("url", "URL is required").notEmpty();
@@ -134,7 +169,7 @@ route.post("/deleteLink", (req, res) => {
     email: userEmail,
   })
     .then((link) => {
-      res.json(link);
+      return res.status(200).redirect("/dashboard");
     })
     .catch((err) => {
       console.log(err);
@@ -202,6 +237,7 @@ route.get("/LinkStats/:id", (req, res) => {
         clicks: link.link.clicks,
         created_at: moment(link.link.created_at).format("Do MMM YYYY"),
         updated_at: moment(link.link.updated_at).format("Do MMM YYYY"),
+        isPrivate: link.isPrivate,
       };
 
       return res.render("linkStats", { link: linkData });

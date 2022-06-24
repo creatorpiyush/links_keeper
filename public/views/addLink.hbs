@@ -1,10 +1,116 @@
-<form action="/links/addLink" method="POST">
-  <input type="text" name="title" placeholder="Enter Title" />
-  <input type="url" name="url" placeholder="Enter URL" />
-  <input type="text" name="description" placeholder="Enter Description" />
-  <span>
-    <input type="checkbox" name="isPrivate" value="true" />
-    Make it Private
-  </span>
-  <button type="submit">Submit</button>
-</form>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Add Link</title>
+
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+
+  </head>
+  <body>
+
+    <div class="container">
+
+      <div class="row">
+        <div class="col-md-5 col-md-offset-4 mx-auto m-auto p-auto">
+          <h1>Add Link</h1>
+
+          {{! <form action="/links/addLink" method="POST">
+            <input type="text" name="title" placeholder="Enter Title" />
+            <input type="url" name="url" placeholder="Enter URL" />
+            <input
+              type="text"
+              name="description"
+              placeholder="Enter Description"
+            />
+            <span>
+              <input type="checkbox" name="isPrivate" value="true" />
+              Make it Private
+            </span>
+            <button type="submit">Submit</button>
+          </form> }}
+
+          <form action="/links/addLink" method="POST">
+
+            {{#if error}}
+              <div class="alert alert-danger text-center mx-auto" role="alert">
+                {{error}}
+                !
+              </div>
+            {{/if}}
+
+            <div class="form-floating mb-3">
+              <input
+                type="text"
+                class="form-control"
+                id="floatingInput"
+                name="title"
+                placeholder="Enter Title"
+              />
+              <label for="floatingInput">Enter Title</label>
+            </div>
+            <div class="form-floating mb-3">
+              <input
+                type="url"
+                class="form-control"
+                id="floatingInput"
+                name="url"
+                placeholder="Enter URL"
+              />
+              <label for="floatingInput">Enter URL</label>
+            </div>
+
+            <div class="form-floating mb-3">
+              <input
+                type="text"
+                class="form-control"
+                id="floatingInput"
+                name="description"
+                placeholder="Enter Description"
+              />
+              <label for="floatingInput">Enter Description</label>
+            </div>
+
+            {{! <div class="form-check">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                name="isPrivate"
+                value="true"
+                id="defaultCheck1"
+              />
+              <label class="form-check-label" for="defaultCheck1">
+                Make it Private
+              </label>
+            </div> }}
+
+            <div class="form-check form-switch">
+
+              <input
+                class="form-check-input"
+                type="checkbox"
+                role="switch"
+                name="isPrivate"
+                value="true"
+                id="flexSwitchCheckDefault"
+              />
+              <label class="form-check-label" for="flexSwitchCheckDefault">Make
+                it Private</label>
+            </div>
+
+            <button
+              type="submit"
+              class="btn btn-primary btn-block mt-2 mx-auto d-block"
+            >Add Link</button>
+          </form>
+        </div>
+      </div>
+
+    </div>
+
+  </body>
+
+  <script async defer src="/js/jquery.js"></script>
+  <script src="/js/bootstrap.bundle.min.js"></script>
+</html>

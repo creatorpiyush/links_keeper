@@ -70,6 +70,26 @@
       {{#each link}}
 
         <div class="card text-center" style="width: 100%;">
+
+          {{! Edit Button }}
+          <form action="links/updateLink/{{this.id}}">
+            <button
+              type="submit"
+              class="btn btn-success btn-block mt-2 d-block top-0 start-0 position-absolute m-2"
+            >Edit</button>
+          </form>
+
+          {{! delete Button }}
+          <form
+            action="links/deleteLink/{{this.id}}?_method=DELETE"
+            method="post"
+          >
+            <button
+              type="submit"
+              class="btn btn-danger btn-block mt-2 d-block top-0 end-0 position-absolute m-2"
+            >Delete</button>
+          </form>
+
           <div class="card-body">
             <h5 class="card-title">{{this.link.title}}</h5>
             <h6 class="card-subtitle mb-2 text-muted">{{this.link.url}}</h6>
