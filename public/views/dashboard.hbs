@@ -15,7 +15,7 @@
       <div class="container-fluid">
         <a class="navbar-brand" href="#">Navbar</a>
         <button
-          class="navbar-toggler"
+          piyushanand="navbar-toggler"
           type="button"
           data-bs-toggle="collapse"
           data-bs-target="#navbarNavAltMarkup"
@@ -51,6 +51,21 @@
       </form>
 
       {{user.email}}
+      <br />
+      <h3 class="share-link">
+        <a href="/{{user.username}}">View Your Profile</a>
+      </h3>
+
+      <button
+        class="btn btn-primary btn-block mt-2 mx-auto d-block"
+        id="copy"
+        data-clipboard-text=""
+        onclick="copyLink('{{user.username}}')"
+      >
+        Copy to clipboard
+      </button>
+
+      {{user.username}}
 
       {{#each link}}
 
@@ -73,5 +88,20 @@
 
   <script async defer src="/js/jquery.js"></script>
   <script src="/js/bootstrap.bundle.min.js"></script>
+  <script
+    src="https://cdn.jsdelivr.net/npm/clipboard@2.0.10/dist/clipboard.min.js"
+  ></script>
+
+  <script>
+    new ClipboardJS('.btn');
+  </script>
+
+  <script>
+    function copyLink(username) { var copyText = window.location.origin +
+    '/username';
+    document.getElementById("copy").setAttribute("data-clipboard-text",
+    copyText); }
+
+  </script>
 
 </html>

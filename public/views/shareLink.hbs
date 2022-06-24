@@ -12,9 +12,11 @@
     <br />
 
     {{#each linksdata}}
-      <a onclick="update('{{this.id}}')" href="{{this.link.url}}">
-        {{this.link.title}}
-      </a>
+      {{#if this.isPrivate}}{{else}}
+        <a onclick="update('{{this.id}}')" href="{{this.link.url}}">
+          {{this.link.title}}
+        </a>
+      {{/if}}
     {{/each}}
 
   </body>

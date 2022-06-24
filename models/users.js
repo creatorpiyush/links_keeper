@@ -37,6 +37,10 @@ const schema = new mongoose.Schema({
     ref: "UserData",
   },
 
+  forget_password_token: {
+    type: String,
+  },
+
   created_at: {
     type: Date,
     default: Date.now,

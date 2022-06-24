@@ -8,6 +8,8 @@ const jwt = require("jsonwebtoken");
 
 const nodemailer = require("nodemailer");
 
+const crypto = require("crypto");
+
 const { body, validationResult } = require("express-validator");
 
 // * signup
@@ -109,7 +111,11 @@ route.post("/signup", (req, res) => {
 // * login
 
 route.get("/login", (req, res) => {
-  return res.render("login", { error: req.flash("error") });
+  if (!req.session.user) {
+    return res.render("login", { error: req.flash("error") });
+  } else {
+    return res.redirect("/dashboard");
+  }
 });
 
 route.post("/login", (req, res) => {
@@ -215,9 +221,114 @@ route.get("/verify/:access_token", (req, res) => {
 // * logout
 route.delete("/logout", (req, res) => {
   req.session.destroy();
-  res.status(200).json({
-    message: "User logged out",
+  res.status(200).redirect("./login");
+});
+
+// * forgot password
+route.get("/forgot-password", (req, res) => {
+  return res.render("forgot-password", { error: req.flash("error") });
+});
+
+route.post("/forgot-password", (req, res) => {
+  const { email } = req.body;
+
+  if (email === "") {
+    return res.render("forgot-password", { error: "Please enter your email" });
+  }
+
+  db.User.findOne({ email })
+    .then((user) => {
+      if (!user) {
+        return res.render("forgot-password", { error: "User not found" });
+      }
+
+      // token to verify user
+      const forget_password_token = crypto.randomBytes(20).toString("hex");
+
+      user.forget_password_token = forget_password_token;
+
+      user
+        .save()
+        .then((user) => {
+          sendForgotPasswordEmail(
+            user.email,
+            user.username,
+            forget_password_token
+          );
+          return res.render("forgot-password", { success: "Email sent" });
+        })
+        .catch((err) => {
+          return res.render("forgot-password", {
+            error: "Error sending email",
+          });
+        });
+    })
+    .catch((err) => {
+      return res.render("forgot-password", { error: "Error sending email" });
+    });
+});
+
+// * reset password
+route.get("/reset-password/:forget_password_token", (req, res) => {
+  res.render("reset-password", {
+    forget_password_token: req.params.forget_password_token,
+    error: req.flash("error"),
   });
+});
+
+route.post("/reset-password", (req, res) => {
+  const { forget_password_token } = req.body;
+  const { password, confirm_password } = req.body;
+
+  if (password === "" || confirm_password === "") {
+    return res.render("reset-password", {
+      error: "Please enter your password",
+    });
+  }
+
+  if (password !== confirm_password) {
+    return res.render("reset-password", { error: "Passwords do not match" });
+  }
+
+  db.User.findOne({ forget_password_token })
+    .then((user) => {
+      if (!user) {
+        return res.render("reset-password", { error: "User not found" });
+      }
+
+      // delete forget_password_token
+      user.forget_password_token = null;
+
+      // encrypt password
+      bcrypt.genSalt(10, (err, salt) => {
+        bcrypt.hash(password, salt, (err, hash) => {
+          if (err) {
+            console.log(err);
+            return res.render("reset-password", {
+              error: "Error encrypting password",
+            });
+          }
+
+          user.password = hash;
+
+          user.updated_at = Date.now();
+
+          user
+            .save()
+            .then((user) => {
+              res.redirect("/user/login");
+            })
+            .catch((err) => {
+              res.render("reset-password", {
+                error: "Error resetting password",
+              });
+            });
+        });
+      });
+    })
+    .catch((err) => {
+      res.render("reset-password", { error: "Error resetting password" });
+    });
 });
 
 // * send verification email
@@ -237,7 +348,7 @@ function sendVerificationEmail(email, username, access_token) {
     to: email,
     subject: "Hello ✔",
     text: "Hello world?",
-    html: `<b>Hello ${username}!</b> <br> <br> <a href="http://localhost:3000/users/verify/${access_token}">Click here to verify your account</a>`,
+    html: `<b>Hello ${username}!</b> <br> <br> <a href="http://localhost:3000/user/verify/${access_token}">Click here to verify your account</a>`,
   };
 
   transporter.sendMail(mailOptions, (error, info) => {
@@ -248,8 +359,8 @@ function sendVerificationEmail(email, username, access_token) {
   });
 }
 
-// * send reset email
-function sendResetEmail(email, reset_token) {
+// * send forgot password email
+function sendForgotPasswordEmail(email, username, forget_password_token) {
   let transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
     port: 587,
@@ -265,7 +376,7 @@ function sendResetEmail(email, reset_token) {
     to: email,
     subject: "Hello ✔",
     text: "Hello world?",
-    html: `<b>Hello!</b> <br> <br> <a href="http://localhost:3000/users/reset-password/${reset_token}">Click here to reset your password</a>`,
+    html: `<b>Hello ${username}!</b> <br> <br> <a href="http://localhost:3000/user/reset-password/${forget_password_token}">Click here to reset your password</a>`,
   };
 
   transporter.sendMail(mailOptions, (error, info) => {

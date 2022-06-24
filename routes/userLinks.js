@@ -7,8 +7,16 @@ const db = require("../models");
 const moment = require("moment");
 
 // add Link
+route.get("/addLink", (req, res) => {
+  if (req.session.user) {
+    res.render("addLink");
+  } else {
+    res.redirect("/user/login");
+  }
+});
+
 route.post("/addLink", (req, res) => {
-  const { title, url, description } = req.body;
+  const { title, url, description, isPrivate } = req.body;
 
   // * Validate
   body("title", "Title is required").notEmpty();
@@ -21,6 +29,8 @@ route.post("/addLink", (req, res) => {
   }
 
   let userEmail = req.session.user.email;
+
+  // console.log(title, url, description, isPrivate);
 
   // * Check if Link already exists
   db.Link.findOne({
@@ -45,6 +55,7 @@ route.post("/addLink", (req, res) => {
     db.Link.create({
       link: userLink,
       email: userEmail,
+      isPrivate,
     })
       .then((link) => {
         res.json(link);
