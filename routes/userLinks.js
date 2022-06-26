@@ -122,6 +122,7 @@ route.post("/updateLink/:id", (req, res) => {
         "link.url": url,
         "link.description": description,
         isPrivate: isPrivate,
+        updated_at: Date.now(),
       },
     },
     {
@@ -235,8 +236,8 @@ route.get("/LinkStats/:id", (req, res) => {
         url: link.link.url,
         description: link.link.description,
         clicks: link.link.clicks,
-        created_at: moment(link.link.created_at).format("Do MMM YYYY"),
-        updated_at: moment(link.link.updated_at).format("Do MMM YYYY"),
+        created_at: moment(link.created_at).format("Do MMM YYYY h:mm:ss a"),
+        updated_at: moment(link.updated_at).format("Do MMM YYYY h:mm:ss a"),
         isPrivate: link.isPrivate,
       };
 

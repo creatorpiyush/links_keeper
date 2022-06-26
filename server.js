@@ -11,6 +11,8 @@ const flash = require("connect-flash");
 
 const methodOverride = require("method-override");
 
+const multer = require("multer");
+
 require("dotenv").config();
 
 const app = express();
@@ -42,6 +44,19 @@ const db = require("./models");
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// multer
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "./public/images");
+  }
+  // filename: function (req, file, cb) {
+  //   cb(null, file.fieldname + "-" + Date.now() + "." + file.originalname.split(".")[1]);
+  // }
+});
+
+
+
 
 // routers
 app.use("/", require("./routes/index"));

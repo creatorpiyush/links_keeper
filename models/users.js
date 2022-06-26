@@ -8,6 +8,18 @@ const schema = new mongoose.Schema({
     trim: true,
   },
 
+  displayName: {
+    type: String,
+  },
+
+  displayImage: {
+    type: String,
+  },
+
+  displayCover: {
+    type: String,
+  },
+
   username: {
     type: String,
     unique: true,

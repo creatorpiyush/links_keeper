@@ -1,0 +1,22 @@
+{{user}}
+
+{{#if user.displayImage}}
+  <img
+    src="{{user.displayImage}}"
+    alt="{{user.username}}"
+    class="img-fluid rounded-circle"
+  />
+{{else}}
+  <img
+    src="https://avatars.dicebear.com/api/initials/{{user.username}}.svg?radius=50&dataUri=true&size=200"
+    alt="{{user.username}}"
+    class="img-fluid rounded-circle"
+  />
+{{/if}}
+
+<br />
+
+<div>
+  {{link_counter}}
+  Links Created
+</div>

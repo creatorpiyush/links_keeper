@@ -12,9 +12,22 @@ const crypto = require("crypto");
 
 const { body, validationResult } = require("express-validator");
 
+const multer = require("multer");
+
+const cloudinary = require("cloudinary").v2;
+
+cloudinary.config({
+  cloud_name: "creatorpiyush",
+  api_key: "897718564747982",
+  api_secret: "J8UTV3thq628g70AC3R-eXDG5sw",
+});
+
+// multer
+const upload = multer({ dest: "public/images" });
+
 // * signup
 route.post("/signup", (req, res) => {
-  const { email, username, password, confirm_password } = req.body;
+  const { email, username, password, confirm_password, displayName } = req.body;
 
   // * Validate
   body("email", "Email is required").isEmail();
@@ -74,6 +87,7 @@ route.post("/signup", (req, res) => {
         username,
         password,
         access_token,
+        displayName,
       });
 
       // * Hash password
@@ -84,9 +98,7 @@ route.post("/signup", (req, res) => {
 
           // * Save user to database
           newUser
-
             .save()
-
             .then((user) => {
               sendVerificationEmail(email, username, access_token);
               res.json({
@@ -94,7 +106,6 @@ route.post("/signup", (req, res) => {
                 user,
               });
             })
-
             .catch((err) => {
               console.log(err);
               res.status(400).json({
@@ -217,6 +228,87 @@ route.get("/verify/:access_token", (req, res) => {
       });
     });
 });
+
+// * user profile
+route.get("/profile/:id", async (req, res) => {
+  if (!req.session.user) {
+    return res.redirect("/login");
+  }
+
+  const { id } = req.params;
+
+  await db.User.findById(id)
+    .then(async (user) => {
+      if (!user) {
+        return res.status(400).json({
+          message: "User not found",
+        });
+      }
+
+      // todo : count public private links
+
+      await db.Link.find({ email: user.email })
+        .then(async (links) => {
+          await db.Link.countDocuments({ email: user.email })
+            .then((count) => {
+              link_counter = count;
+            })
+            .catch((err) => {
+              console.log(err);
+            });
+          return res.render("profile", {
+            user,
+            links,
+            link_counter,
+          });
+        })
+        .catch((err) => {
+          res.status(400).json({
+            message: "Error getting links",
+            err,
+          });
+        });
+    })
+    .catch((err) => {
+      res.status(400).json({
+        message: "Error getting user",
+        err,
+      });
+    });
+});
+
+// * upload image
+route.post(
+  "/profile/:id/upload",
+  upload.single("displayImage"),
+  async (req, res) => {
+    if (!req.session.user) {
+      return res.redirect("/login");
+    }
+
+    const { id } = req.params;
+
+    cloudinary.uploader.upload(req.file.path, async (err, result) => {
+      // console.log(result);
+
+      await db.User.findByIdAndUpdate(id, {
+        displayImage: result.secure_url,
+      })
+        .then((user) => {
+          res.json({
+            message: "Image uploaded",
+            user,
+          });
+        })
+        .catch((err) => {
+          res.status(400).json({
+            message: "Error uploading image",
+            err,
+          });
+        });
+    });
+  }
+);
 
 // * logout
 route.delete("/logout", (req, res) => {

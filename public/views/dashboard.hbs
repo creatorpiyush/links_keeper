@@ -94,6 +94,11 @@
             <h5 class="card-title">{{this.link.title}}</h5>
             <h6 class="card-subtitle mb-2 text-muted">{{this.link.url}}</h6>
             <p class="card-text">{{this.link.description}}</p>
+            {{#if this.isPrivate}}
+              <p class="card-text text-monospace text-info">Private</p>
+            {{else}}
+              <p class="card-text text-monospace text-info">Public</p>
+            {{/if}}
             <a href="/links/LinkStats/{{this.id}}" class="card-link">More Info</a>
           </div>
         </div>
