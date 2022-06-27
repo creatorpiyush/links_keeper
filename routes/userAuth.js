@@ -14,6 +14,8 @@ const { body, validationResult } = require("express-validator");
 
 const multer = require("multer");
 
+const moment = require("moment");
+
 const cloudinary = require("cloudinary").v2;
 
 cloudinary.config({
@@ -256,10 +258,23 @@ route.get("/profile/:id", async (req, res) => {
             .catch((err) => {
               console.log(err);
             });
-          return res.render("profile", {
-            user,
-            links,
+
+          let userData = {
+            id: user.id,
+            email: user.email,
+            username: user.username,
+            displayName: user.displayName,
+            displayImage: user.displayImage,
+            is_verified: user.is_verified,
+            displayCover: user.displayCover,
+            created_at: moment(user.created_at).format("MMMM Do YYYY h:mm a"),
+            updated_at: moment(user.updated_at).format("MMMM Do YYYY h:mm a"),
             link_counter,
+          };
+
+          return res.render("profile", {
+            userData,
+            links,
           });
         })
         .catch((err) => {
