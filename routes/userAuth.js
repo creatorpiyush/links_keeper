@@ -28,6 +28,14 @@ cloudinary.config({
 const upload = multer({ dest: "public/images" });
 
 // * signup
+route.get("/signup", (req, res) => {
+  if (!req.session.user) {
+    return res.render("signup", { error: req.flash("error") });
+  } else {
+    return res.redirect("/dashboard");
+  }
+});
+
 route.post("/signup", (req, res) => {
   const { email, username, password, confirm_password, displayName } = req.body;
 
@@ -70,6 +78,7 @@ route.post("/signup", (req, res) => {
       if (user) {
         return res.status(400).json({
           message: "Username already taken",
+          status: 400,
         });
       }
 
@@ -204,6 +213,8 @@ route.get("/verify/:access_token", (req, res) => {
       if (!user) {
         return res.status(400).json({
           message: "User not found",
+          status: 400,
+          request: false,
         });
       }
 
@@ -213,12 +224,16 @@ route.get("/verify/:access_token", (req, res) => {
         .then((user) => {
           res.json({
             message: "User verified",
+            status: 200,
+            request: true,
             user,
           });
         })
         .catch((err) => {
           res.status(400).json({
             message: "Error verifying user",
+            status: 400,
+            request: false,
             err,
           });
         });
@@ -226,6 +241,8 @@ route.get("/verify/:access_token", (req, res) => {
     .catch((err) => {
       res.status(500).json({
         message: "Error verifying user",
+        status: 500,
+        request: false,
         err,
       });
     });

@@ -49,14 +49,11 @@ app.use(express.urlencoded({ extended: true }));
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "./public/images");
-  }
+  },
   // filename: function (req, file, cb) {
   //   cb(null, file.fieldname + "-" + Date.now() + "." + file.originalname.split(".")[1]);
   // }
 });
-
-
-
 
 // routers
 app.use("/", require("./routes/index"));
