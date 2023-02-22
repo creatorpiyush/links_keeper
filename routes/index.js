@@ -5,7 +5,7 @@ const moment = require("moment");
 const db = require("../models");
 
 route.get("/", (req, res) => {
-  res.send("Hello World!");
+  res.redirect("/dashboard");
 });
 
 // dashboard

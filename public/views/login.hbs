@@ -1,63 +1,61 @@
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Login</title>
 
-    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login</title>
 
-  </head>
-  <body>
+  <link rel="stylesheet" href="/css/bootstrap.min.css" />
 
-    <div class="container">
+</head>
 
-      <div class="row">
-        <div class="col-md-5 col-md-offset-4 mx-auto m-auto p-auto">
-          <h1>Login</h1>
+<body>
 
-          <form action="/user/login" method="post">
+  <div class="container">
+
+    <div class="row">
+      <div class="col-md-5 col-md-offset-4 mx-auto m-auto p-auto">
+        <h1>Login</h1>
+
+        {{!-- <form action="/user/login" method="post"> --}}
+          <form onsubmit="return setActionAndMethod(this)">
 
             {{#if error}}
-              <div class="alert alert-danger text-center mx-auto" role="alert">
-                {{error}}
-                !
-              </div>
+            <div class="alert alert-danger text-center mx-auto" role="alert">
+              {{error}}
+              !
+            </div>
             {{/if}}
 
             <div class="form-floating mb-3">
-              <input
-                type="email"
-                class="form-control"
-                id="floatingInput"
-                name="email"
-                placeholder="Email"
-              />
+              <input type="email" class="form-control" id="floatingInput" name="email" placeholder="Email" />
               <label for="floatingInput">Email address</label>
             </div>
             <div class="form-floating">
-              <input
-                type="password"
-                class="form-control"
-                id="floatingPassword"
-                name="password"
-                placeholder="Password"
-              />
+              <input type="password" class="form-control" id="floatingPassword" name="password"
+                placeholder="Password" />
               <label for="floatingPassword">Password</label>
             </div>
 
-            <button
-              type="submit"
-              class="btn btn-primary btn-block mt-2 mx-auto d-block"
-            >Login</button>
+            <button type="submit" class="btn btn-primary btn-block mt-2 mx-auto d-block">Login</button>
           </form>
-        </div>
       </div>
-
     </div>
 
-  </body>
+  </div>
 
-  <script async defer src="/js/jquery.js"></script>
-  <script src="/js/bootstrap.bundle.min.js"></script>
+</body>
+
+<script async defer src="/js/jquery.js"></script>
+<script src="/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  function setActionAndMethod(form) {
+    form.action = "/user/login";
+    form.method = "post";
+    return true;
+  }
+</script>
+
 </html>

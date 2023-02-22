@@ -25,11 +25,13 @@
       <img height="125" width="125" class="border rounded-circle" src="{{user.displayImage}}" alt="Display Image" />
       {{else}}
       {{#if user.displayName}}
-      <img height="125" width="125" class="border rounded-circle"
-        src="https://ui-avatars.com/api/?name={{user.displayName}}" alt="Display Image" />
+      <img src="https://avatars.dicebear.com/api/initials/{{user.displayName}}.svg?radius=50&dataUri=true&size=200"
+        alt="{{user.displayName}}" class="img-fluid img-thumbnail rounded-circle mx-auto d-block"
+        style="width: 125; height: 125;" />
       {{else}}
-      <img height="125" width="125" class="border rounded-circle"
-        src="https://ui-avatars.com/api/?name={{user.username}}" alt="Display Image" />
+      <img src="https://avatars.dicebear.com/api/initials/{{user.username}}.svg?radius=50&dataUri=true&size=200"
+        alt="{{user.username}}" class="img-fluid img-thumbnail rounded-circle mx-auto d-block"
+        style="width: 125; height: 125;" />
       {{/if}}
 
       {{/if}}
