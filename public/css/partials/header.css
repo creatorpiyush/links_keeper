@@ -1,0 +1,28 @@
+.navbar-custom {
+  color: #cc3333;
+  background-color: #9132a8;
+}
+
+.btn-space {
+  margin-right: 10px;
+}
+.navbar-brand {
+  color: #42f5c8;
+  font-size: 30px;
+  font-family: "candara";
+}
+a:hover {
+  /*background-color: #da3f23;
+  */
+  border-radius: 5%;
+  -webkit-border-radius: 5%;
+  -moz-border-radius: 5%;
+  -ms-border-radius: 5%;
+  -o-border-radius: 5%;
+}
+a {
+  font-size: 18px;
+}
+.nav-link {
+  color: #ffffff;
+}

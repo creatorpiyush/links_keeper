@@ -38,6 +38,8 @@ app.use(express.static(__dirname + "/public"));
 app.set("view engine", "hbs");
 app.set("views", __dirname + "/public/views");
 
+hbs.registerPartials(__dirname + "/public/views/partials");
+
 hbs.localsAsTemplateData(app);
 
 const db = require("./models");
