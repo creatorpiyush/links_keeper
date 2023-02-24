@@ -17,7 +17,3 @@ function copyLink(username) {
     },
   });
 }
-
-$(function () {
-  $('[data-toggle="tooltip"]').tooltip();
-});

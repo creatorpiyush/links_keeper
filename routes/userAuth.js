@@ -290,11 +290,12 @@ route.get("/profile/:id", async (req, res) => {
           };
 
           return res.render("profile", {
-            userData,
+            user: userData,
             links,
           });
         })
         .catch((err) => {
+          console.log(err);
           res.status(400).json({
             message: "Error getting links",
             err,

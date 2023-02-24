@@ -11,6 +11,7 @@
 </head>
 
 <body>
+  {{> header this}}
 
   <div class="container">
 
@@ -25,13 +26,11 @@
       <img height="125" width="125" class="border rounded-circle" src="{{user.displayImage}}" alt="Display Image" />
       {{else}}
       {{#if user.displayName}}
-      <img src="https://avatars.dicebear.com/api/initials/{{user.displayName}}.svg?radius=50&dataUri=true&size=200"
-        alt="{{user.displayName}}" class="img-fluid img-thumbnail rounded-circle mx-auto d-block"
-        style="width: 125; height: 125;" />
+      <img src="https://api.dicebear.com/5.x/thumbs/svg?seed={{user.displayName}}" alt="{{user.displayName}}"
+        class="img-fluid img-thumbnail rounded-circle mx-auto d-block" style="width: 125; height: 125;" />
       {{else}}
-      <img src="https://avatars.dicebear.com/api/initials/{{user.username}}.svg?radius=50&dataUri=true&size=200"
-        alt="{{user.username}}" class="img-fluid img-thumbnail rounded-circle mx-auto d-block"
-        style="width: 125; height: 125;" />
+      <img src="https://api.dicebear.com/5.x/thumbs/svg?seed={{user.username}}" alt="{{user.username}}"
+        class="img-fluid img-thumbnail rounded-circle mx-auto d-block" style="width: 125; height: 125;" />
       {{/if}}
 
       {{/if}}

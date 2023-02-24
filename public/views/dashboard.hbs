@@ -9,82 +9,93 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css">
 </head>
 
+<style>
+  #page-container {
+    position: relative;
+    min-height: 100%;
+    width: 100%;
+  }
+
+  #content-wrap {
+    padding-bottom: 2.5rem;
+  }
+</style>
+
 <body>
 
   {{! header }}
   {{> headerWithData this }}
 
 
-  <div class="container p-2">
+  <div class="container-sm p-0 m-0 mx-auto" id="page-container">
+    <div id="content-wrap">
 
-    <form action="/links/addLink" class="m-0">
-      <button type="submit" class="btn btn-success">Add New Link</button>
-    </form>
+      <form action="/links/addLink" class="m-0">
+        <button type="submit" class="btn btn-success">Add New Link</button>
+      </form>
 
-    {{user.email}}
-    <br />
-    <h3 class="share-link">
-      <a href="/share/{{user.username}}">See Your Public Profile</a>
-    </h3>
+      {{user.email}}
+      <br />
+      <h3 class="share-link">
+        <a href="/share/{{user.username}}">See Your Public Profile</a>
+      </h3>
 
-    <button class="btn btn-primary" id="copy" data-clipboard-text="" onclick="copyLink('{{user.username}}')">
-      Copy your Public Profile
-    </button>
+      <button class="btn btn-primary" id="copy" data-clipboard-text="" onclick="copyLink('{{user.username}}')">
+        Copy your Public Profile
+      </button>
 
-    {{!-- <div class="alert alert-success w-50 mx-auto">
-      <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-      Public Profile Link Copied to Clipboard
-    </div> --}}
+      {{!-- <div class="alert alert-success w-50 mx-auto">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+        Public Profile Link Copied to Clipboard
+      </div> --}}
 
-    <div class="container mx-auto p-2">
+      <div class="container mx-auto p-2">
 
-      {{!-- <div class="card-deck"> --}}
-        <div class="w-75 mx-auto">
-          {{#each link}}
+        {{!-- <div class="card-deck"> --}}
+          <div class="w-75 mx-auto">
+            {{#each link}}
 
-          <div class="card text-center mx-auto m-2">
-            <div class="card-body">
+            <div class="card text-center mx-auto m-2">
+              <div class="card-body">
 
-              <h5 class="card-title">{{this.link.title}}</h5>
-              <h6 class="card-subtitle mb-2 text-muted">{{this.link.url}}</h6>
-              <p class="card-text">{{this.link.description}}</p>
-              {{#if this.isPrivate}}
-              <p class="card-text text-monospace text-info">Private</p>
-              {{else}}
-              <p class="card-text text-monospace text-info">Public</p>
-              {{/if}}
-              <a href="/links/LinkStats/{{this.id}}" class="card-link">More Info</a>
+                <h5 class="card-title">{{this.link.title}}</h5>
+                <h6 class="card-subtitle mb-2 text-muted">{{this.link.url}}</h6>
+                <p class="card-text">{{this.link.description}}</p>
+                {{#if this.isPrivate}}
+                <p class="card-text text-monospace text-info">Private</p>
+                {{else}}
+                <p class="card-text text-monospace text-info">Public</p>
+                {{/if}}
+                <a href="/links/LinkStats/{{this.id}}" class="card-link">More Info</a>
 
-            </div>
-            <div class="card-footer">
-              <div class="row">
-                <div class="col">
-                  {{! Edit Button }}
-                  <form action="links/updateLink/{{this.id}}" class="m-0">
-                    <button type="submit" class="btn btn-success">Edit</button>
-                  </form>
-                </div>
+              </div>
+              <div class="card-footer">
+                <div class="row">
+                  <div class="col">
+                    {{! Edit Button }}
+                    <form action="links/updateLink/{{this.id}}" class="m-0">
+                      <button type="submit" class="btn btn-success">Edit</button>
+                    </form>
+                  </div>
 
-                <div class="col">
-                  {{! delete Button }}
-                  <form action="links/deleteLink/{{this.id}}?_method=DELETE" method="post" class="m-0">
-                    <button type="submit" class="btn btn-danger">Delete</button>
-                  </form>
+                  <div class="col">
+                    {{! delete Button }}
+                    <form action="links/deleteLink/{{this.id}}?_method=DELETE" method="post" class="m-0">
+                      <button type="submit" class="btn btn-danger" onclick="deleteLink('{{this.id}}')">Delete</button>
+                    </form>
+                  </div>
                 </div>
               </div>
             </div>
+
+            {{/each}}
           </div>
-
-          {{/each}}
         </div>
-      </div>
 
+      </div>
+      {{> footer }}
     </div>
 
-  </div>
-
-  <div>
-    {{> footer }}
   </div>
 
 </body>
