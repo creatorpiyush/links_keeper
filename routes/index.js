@@ -9,14 +9,24 @@ route.get("/", (req, res) => {
 });
 
 // dashboard
-route.get("/dashboard", (req, res) => {
+route.get("/dashboard", async (req, res) => {
   if (req.session.user) {
-    db.Link.find({ email: req.session.user.email })
+   await db.Link.find({ email: req.session.user.email })
       .populate("link")
       .then((link) => {
+        return res.status(200).json({
+          request: true,
+          data: link,
+          user: req.session.user,
+        })
         res.render("dashboard", { link, user: req.session.user });
       });
   } else {
+    return res.status(400).json({
+      error: "Please login to continue",
+      request: false,
+    });
+
     res.redirect("/user/login");
   }
 });

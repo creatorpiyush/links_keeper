@@ -19,9 +19,9 @@ const moment = require("moment");
 const cloudinary = require("cloudinary").v2;
 
 cloudinary.config({
-  cloud_name: "creatorpiyush",
-  api_key: "897718564747982",
-  api_secret: "J8UTV3thq628g70AC3R-eXDG5sw",
+  cloud_name: process.env.CLOUDINARY_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
 // multer
@@ -52,12 +52,13 @@ route.post("/signup", (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     console.log(errors.array());
-    return res.status(422).json({ errors: error });
+    return res.status(422).json({ errors: error, request: false });
   }
 
   if (password !== confirm_password) {
     return res.status(400).json({
       message: "Password and Confirm Password do not match",
+      request: false,
     });
   }
 
@@ -68,6 +69,7 @@ route.post("/signup", (req, res) => {
     if (user) {
       return res.status(400).json({
         message: "User already exists",
+        request: false,
       });
     }
 
@@ -78,16 +80,14 @@ route.post("/signup", (req, res) => {
       if (user) {
         return res.status(400).json({
           message: "Username already taken",
-          status: 400,
+          request: false,
         });
       }
 
       let access_token = jwt.sign(
         {
-          email,
           username,
           password,
-          confirm_password,
         },
         process.env.JWT_SECRET
       );
@@ -115,6 +115,7 @@ route.post("/signup", (req, res) => {
               res.json({
                 message: "User created",
                 user,
+                request: true,
               });
             })
             .catch((err) => {
@@ -122,6 +123,7 @@ route.post("/signup", (req, res) => {
               res.status(400).json({
                 message: "Error creating user",
                 err,
+                request: false,
               });
             });
         });
@@ -150,58 +152,123 @@ route.post("/login", (req, res) => {
 
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(422).json({ errors: error });
+    return res.status(422).json({ errors: error, request: false });
   }
 
   // * empty field check
   if (email === "" || password === "") {
-    return res.status(400).render("login", {
+    return res.status(400).json({
       error: "Please fill in all fields",
+      request: false,
     });
   }
 
   db.User.findOne({ email })
     .then((user) => {
       if (!user) {
-        return res.status(400).render("login", { error: "User not found" });
+        return res.status(400).json({
+          message: "User not found",
+          request: false,
+        });
       }
 
       bcrypt.compare(password, user.password).then((isMatch) => {
         if (!isMatch) {
-          return res.render("login", { error: "Incorrect password" });
+          return res.status(400).json({
+            message: "Incorrect password",
+            request: false,
+          });
         }
 
         // * is user verified
         if (!user.is_verified) {
           sendVerificationEmail(user.email, user.username, user.access_token);
-          return res.render("login", { error: "User not verified" });
+          return res.status(400).json({
+            message: "User not verified",
+            request: false,
+          });
         }
 
         const payload = {
-          id: user.id,
-          name: user.name,
           email: user.email,
-          access_token: user.access_token,
+          password: password,
         };
 
         jwt.sign(payload, process.env.JWT_SECRET, (err, token) => {
           if (err) {
-            return res
-              .status(400)
-              .render("login", { error: "Error logging in" });
+            return res.status(400).json({
+              message: "Error logging in",
+              request: false,
+            });
           }
 
+          // add token to database
+          db.User.findOneAndUpdate({ email }, { access_token: token }).then(
+            (user) => {
+              if (!user) {
+                return res.status(400).json({
+                  message: "Error logging in",
+                  request: false,
+                });
+              }
+            }
+          );
+
+          // * set session
+          let newUser = { ...user }._doc;
+          delete newUser.password;
+          delete newUser.forget_password_token;
+          newUser.access_token = token;
           req.session.user = user;
 
-          res.status(200).redirect("/dashboard");
+          return res.json({
+            message: "User logged in",
+            userStatus: user.is_verified,
+            request: true,
+            token,
+          });
         });
       });
     })
     .catch((err) => {
+      return res.status(400).json({
+        message: "Error logging in",
+        request: false,
+      });
       res.status(400).render("login", { error: "Error logging in" });
       req.flash("error", "Error logging in");
       return res.redirect("./login");
     });
+});
+
+// get user details via access token
+route.get("/get/:access_token", (req, res) => {
+  const { access_token } = req.params;
+
+  db.User.findOne({ access_token }).then((user) => {
+    if (!user) {
+      return res.status(400).json({
+        message: "User not found",
+        request: false,
+      });
+    }
+
+    userDetails = {
+      email: user.email,
+      username: user.username,
+      displayName: user.displayName,
+      is_verified: user.is_verified,
+      access_token: user.access_token,
+      createdAt: user.created_at,
+      updatedAt: user.updated_at,
+    };
+
+    res.json({
+      message: "User found",
+      request: true,
+      userDetails,
+    });
+  });
 });
 
 // * verify email
@@ -213,7 +280,6 @@ route.get("/verify/:access_token", (req, res) => {
       if (!user) {
         return res.status(400).json({
           message: "User not found",
-          status: 400,
           request: false,
         });
       }
@@ -224,7 +290,6 @@ route.get("/verify/:access_token", (req, res) => {
         .then((user) => {
           res.json({
             message: "User verified",
-            status: 200,
             request: true,
             user,
           });
@@ -232,7 +297,6 @@ route.get("/verify/:access_token", (req, res) => {
         .catch((err) => {
           res.status(400).json({
             message: "Error verifying user",
-            status: 400,
             request: false,
             err,
           });
@@ -241,7 +305,6 @@ route.get("/verify/:access_token", (req, res) => {
     .catch((err) => {
       res.status(500).json({
         message: "Error verifying user",
-        status: 500,
         request: false,
         err,
       });
@@ -261,6 +324,7 @@ route.get("/profile/:id", async (req, res) => {
       if (!user) {
         return res.status(400).json({
           message: "User not found",
+          request: false,
         });
       }
 
@@ -273,7 +337,11 @@ route.get("/profile/:id", async (req, res) => {
               link_counter = count;
             })
             .catch((err) => {
-              console.log(err);
+              res.status(400).json({
+                message: "Error getting links",
+                err,
+                request: false,
+              });
             });
 
           let userData = {
@@ -289,9 +357,11 @@ route.get("/profile/:id", async (req, res) => {
             link_counter,
           };
 
-          return res.render("profile", {
+          return res.status(200).json({
+            message: "User found",
             user: userData,
             links,
+            request: true,
           });
         })
         .catch((err) => {
@@ -299,6 +369,7 @@ route.get("/profile/:id", async (req, res) => {
           res.status(400).json({
             message: "Error getting links",
             err,
+            request: false,
           });
         });
     })
@@ -306,6 +377,7 @@ route.get("/profile/:id", async (req, res) => {
       res.status(400).json({
         message: "Error getting user",
         err,
+        request: false,
       });
     });
 });
@@ -316,7 +388,10 @@ route.post(
   upload.single("displayImage"),
   async (req, res) => {
     if (!req.session.user) {
-      return res.redirect("/login");
+      return res.status(400).json({
+        message: "User not found",
+        request: false,
+      });
     }
 
     const { id } = req.params;
@@ -331,12 +406,14 @@ route.post(
           res.json({
             message: "Image uploaded",
             user,
+            request: true,
           });
         })
         .catch((err) => {
           res.status(400).json({
             message: "Error uploading image",
             err,
+            request: false,
           });
         });
     });
@@ -346,6 +423,10 @@ route.post(
 // * logout
 route.delete("/logout", (req, res) => {
   req.session.destroy();
+  return res.status(200).json({
+    message: "User logged out",
+    request: true,
+  });
   res.status(200).redirect("./login");
 });
 
@@ -358,13 +439,19 @@ route.post("/forgot-password", (req, res) => {
   const { email } = req.body;
 
   if (email === "") {
-    return res.render("forgot-password", { error: "Please enter your email" });
+    return res.status(400).json({
+      message: "Please enter your email",
+      request: false,
+    });
   }
 
   db.User.findOne({ email })
     .then((user) => {
       if (!user) {
-        return res.render("forgot-password", { error: "User not found" });
+        return res.status(400).json({
+          message: "User not found",
+          request: false,
+        });
       }
 
       // token to verify user
@@ -380,16 +467,25 @@ route.post("/forgot-password", (req, res) => {
             user.username,
             forget_password_token
           );
-          return res.render("forgot-password", { success: "Email sent" });
+          return res.status(200).json({
+            message: "Email sent",
+            request: true,
+          });
         })
         .catch((err) => {
-          return res.render("forgot-password", {
-            error: "Error sending email",
+          return res.status(400).json({
+            message: "Error sending email",
+            request: false,
+            err,
           });
         });
     })
     .catch((err) => {
-      return res.render("forgot-password", { error: "Error sending email" });
+      return res.status(400).json({
+        message: "Error sending email",
+        request: false,
+        err,
+      });
     });
 });
 
@@ -402,23 +498,29 @@ route.get("/reset-password/:forget_password_token", (req, res) => {
 });
 
 route.post("/reset-password", (req, res) => {
-  const { forget_password_token } = req.body;
-  const { password, confirm_password } = req.body;
+  const { forget_password_token, password, confirm_password } = req.body;
 
   if (password === "" || confirm_password === "") {
-    return res.render("reset-password", {
-      error: "Please enter your password",
+    return res.status(400).json({
+      message: "Please enter your password",
+      request: false,
     });
   }
 
   if (password !== confirm_password) {
-    return res.render("reset-password", { error: "Passwords do not match" });
+    return res.status(400).json({
+      message: "Passwords do not match",
+      request: false,
+    });
   }
 
   db.User.findOne({ forget_password_token })
     .then((user) => {
       if (!user) {
-        return res.render("reset-password", { error: "User not found" });
+        return res.status(400).json({
+          message: "User not found",
+          request: false,
+        });
       }
 
       // delete forget_password_token
@@ -428,9 +530,10 @@ route.post("/reset-password", (req, res) => {
       bcrypt.genSalt(10, (err, salt) => {
         bcrypt.hash(password, salt, (err, hash) => {
           if (err) {
-            console.log(err);
-            return res.render("reset-password", {
-              error: "Error encrypting password",
+            return res.status(400).json({
+              message: "Error encrypting password",
+              err,
+              request: false,
             });
           }
 
@@ -441,18 +544,28 @@ route.post("/reset-password", (req, res) => {
           user
             .save()
             .then((user) => {
-              res.redirect("/user/login");
+              return res.status(200).json({
+                message: "Password reset successfully",
+                request: true,
+                username: user.username,
+              });
             })
             .catch((err) => {
-              res.render("reset-password", {
-                error: "Error resetting password",
+              return res.status(400).json({
+                message: "Error resetting password",
+                request: false,
+                err,
               });
             });
         });
       });
     })
     .catch((err) => {
-      res.render("reset-password", { error: "Error resetting password" });
+      return res.status(400).json({
+        message: "Error resetting password",
+        request: false,
+        err,
+      });
     });
 });
 
@@ -480,7 +593,7 @@ function sendVerificationEmail(email, username, access_token) {
     if (error) {
       return console.log(error);
     }
-    console.log("Message sent: %s", info.messageId);
+    return info;
   });
 }
 
@@ -508,7 +621,7 @@ function sendForgotPasswordEmail(email, username, forget_password_token) {
     if (error) {
       return console.log(error);
     }
-    console.log("Message sent: %s", info.messageId);
+    return info;
   });
 }
 
