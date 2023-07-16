@@ -12,10 +12,11 @@ route.get("/:username", (req, res) => {
       if (user) {
         db.Link.find({ email: user.email })
           .populate("link")
-          .then((linksdata) => {
+          .then((linksData) => {
             db.User.findOne({ username: username }).then((user) => {
-              res.render("shareLink", {
-                linksdata,
+              return res.status(200).json({
+                request: true,
+                data: linksData,
                 user: {
                   username: user.username,
                   displayImage: user.displayImage,
@@ -27,19 +28,22 @@ route.get("/:username", (req, res) => {
             });
           })
           .catch((err) => {
-            res.status(400).render("error", {
+            return res.status(400).json({
               error: "Error finding links",
+              request: false,
             });
           });
       } else {
-        res.status(400).render("error", {
+        return res.status(400).json({
           error: "User not found",
+          request: false,
         });
       }
     })
     .catch((err) => {
-      res.status(400).render("error", {
+      return res.status(400).json({
         error: "Error finding page",
+        request: false,
       });
     });
 });

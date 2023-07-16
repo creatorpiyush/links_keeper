@@ -27,7 +27,7 @@ route.post("/addLink", (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     console.log(errors.array());
-    return res.status(422).json({ errors: error });
+    return res.status(422).json({ message: errors, request: false });
   }
 
   let userEmail = req.session.user.email;
@@ -42,12 +42,9 @@ route.post("/addLink", (req, res) => {
     email: userEmail,
   }).then((link) => {
     if (link) {
-      // return res.status(400).json({
-      //   message: "Link already exists",
-      // });
-
-      return res.status(400).render("addLink", {
-        error: "Link already exists",
+      return res.status(400).json({
+        message: "Link already exists",
+        request: false,
       });
     }
 
@@ -64,11 +61,13 @@ route.post("/addLink", (req, res) => {
       isPrivate,
     })
       .then((link) => {
-        res.redirect("/dashboard");
+        return res.status(200).json({
+          message: "Link added successfully",
+          request: true,
+        });
       })
       .catch((err) => {
-        console.log(err);
-        res.status(400).json(err);
+        return res.status(400).json({ message: err, request: false });
       });
   });
 });
@@ -82,17 +81,22 @@ route.get("/updateLink/:id", (req, res) => {
       _id: id,
     }).then((link) => {
       if (link) {
-        res.render("updateLink", {
-          link,
+        return res.status(200).json({
+          request: true,
+          data: link,
         });
       } else {
-        res.status(400).render("error", {
-          error: "Link not found",
+        return res.status(400).json({
+          message: "Link not found",
+          request: false,
         });
       }
     });
   } else {
-    res.redirect("/user/login");
+    return res.status(400).json({
+      error: "Please login to continue",
+      request: false,
+    });
   }
 });
 
@@ -136,9 +140,10 @@ route.post("/updateLink/:id", (req, res) => {
         });
       }
 
-      return res.status(200).redirect("/dashboard");
-
-      res.json(link);
+      return res.status(200).json({
+        message: "Link updated successfully",
+        request: true,
+      });
     })
     .catch((err) => {
       console.log(err);
@@ -170,7 +175,10 @@ route.delete("/deleteLink/:id", (req, res) => {
     email: userEmail,
   })
     .then((link) => {
-      return res.status(200).redirect("/dashboard");
+      return res.status(200).json({
+        message: "Link deleted successfully",
+        request: true,
+      });
     })
     .catch((err) => {
       console.log(err);
@@ -241,12 +249,14 @@ route.get("/LinkStats/:id", (req, res) => {
         isPrivate: link.isPrivate,
       };
 
-      return res.render("linkStats", { link: linkData });
-      // res.json(link);
+      return res.status(200).json({
+        request: true,
+        data: linkData,
+      });
     })
     .catch((err) => {
       console.log(err);
-      res.status(400).json(err);
+      res.status(400).json({ message: "Link not found", request: false });
     });
 });
 
